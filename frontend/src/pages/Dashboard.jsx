@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../provider/AuthProvider";
 import { FaRegEdit } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
@@ -37,31 +38,39 @@ const Dashboard = () => {
         const category = e.target.category.value;
         const timestamp = new Date().toISOString();
 
-        const newTask = {
-            mail,
-            title,
-            description,
-            timestamp,
-            category,
-        };
+        const newTask = { mail, title, description, timestamp, category };
 
         fetch("http://localhost:3000/tasks", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newTask),
         })
             .then((res) => res.json())
             .then((data) => {
                 if (data.insertedId) {
-                    setTasks([...tasks, newTask]); // Update UI
+                    setTasks([...tasks, { ...newTask, _id: data.insertedId }]); // Fix: Add _id from MongoDB
                     closeModal();
                 }
             })
-            .catch((error) => {
-                console.error("Error:", error);
+            .catch((error) => console.error("Error:", error));
+    };
+
+    // ✅ Fix: Correctly delete the task
+    const deleteTask = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:3000/tasks/${id}`, {
+                method: "DELETE",
             });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete task");
+            }
+
+            // ✅ Remove task from tasks array
+            setTasks(tasks.filter((task) => task._id !== id));
+        } catch (error) {
+            console.error("Error deleting task:", error);
+        }
     };
 
     if (!user) {
@@ -113,9 +122,15 @@ const Dashboard = () => {
                         <div className="py-2">
                             {tasks.length > 0 ? (
                                 tasks.map((task) => (
-                                    <div key={task._id} className="flex justify-between border border-gray-400 py-2 px-1 rounded-lg mb-2">
-                                        <p>{task.title}</p>
-                                        <button><FaRegEdit /></button>
+                                    <div key={task._id} className="border border-gray-400 py-2 px-1 rounded-lg mb-2">
+                                        <div className="flex justify-between">
+                                            <p className="text-lg font-bold">{task.title}</p>
+                                            <div className="flex gap-2 items-center">
+                                                <button><FaRegEdit /></button>
+                                                <button onClick={() => deleteTask(task._id)} className="text-red-500"><MdDelete /></button>
+                                            </div>
+                                        </div>
+                                        <p>{task.description}</p>
                                     </div>
                                 ))
                             ) : (
