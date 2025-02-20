@@ -24,15 +24,20 @@ async function run() {
         // Connect the client to the server
         await client.connect();
 
-        const TaskCollection = client.db('taskManagementDB').collection('tasks');
+        const TaskCollection = client.db('taskManagementDB').collection('Tasks');
 
         // add new task on the database
-        app.post('/addTask', async (req, res) => {
+        app.post('/tasks', async (req, res) => {
             const newTask = req.body;
-            console.log(newTask);
             const result = await TaskCollection.insertOne(newTask);
             res.send(result);
         });
+
+        // get all the task on the database
+        app.get('/tasks', async (req, res) => {
+            const result = await TaskCollection.find().toArray();
+            res.send(result);
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
