@@ -10,7 +10,7 @@ app.use(cors());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ub1fi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// MongoDB Client Setup
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -21,52 +21,61 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // Connect the client to the server
         await client.connect();
-
         const TaskCollection = client.db('taskManagementDB').collection('Tasks');
 
-        // add new task on the database
+        // Task Add API (Order Field)
         app.post('/tasks', async (req, res) => {
             const newTask = req.body;
+            const totalTasks = await TaskCollection.countDocuments();
+            newTask.order = totalTasks; // set the Task order 
             const result = await TaskCollection.insertOne(newTask);
             res.send(result);
         });
 
-        // get all the task on the database
+        //  Get All Tasks (Order base Sort)
         app.get('/tasks', async (req, res) => {
-            const result = await TaskCollection.find().toArray();
+            const result = await TaskCollection.find().sort({ order: 1 }).toArray();
             res.send(result);
-        })
+        });
 
-        // delete task on the database
+        // Delete Task API
         app.delete('/tasks/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await TaskCollection.deleteOne(query);
             res.send(result);
-        })
+        });
 
-        // update task on the database
+        //  Task Update
         app.put('/tasks/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
-            const options = { upsert: true }; // Allows updating or inserting if missing
             const updatedTask = req.body;
-            const task = {
+
+            const update = {
                 $set: {
                     title: updatedTask.title,
                     description: updatedTask.description,
                     category: updatedTask.category,
                 }
             };
-            const result = await TaskCollection.updateOne(query, task, options);
-            res.send(result);
-        })
 
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+            const result = await TaskCollection.updateOne(query, update, { upsert: false });
+            res.send(result);
+        });
+
+        //  Task Order & Category Update API (Drag-and-Drop Handle)
+        app.put('/updateTaskOrder/:id', async (req, res) => {
+            const id = req.params.id;
+            const { category, order } = req.body;
+            const query = { _id: new ObjectId(id) };
+            const update = { $set: { category, order } };
+            const result = await TaskCollection.updateOne(query, update, { upsert: false });
+            res.send(result);
+        });
+
+        console.log("Connected to MongoDB!");
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
     }
