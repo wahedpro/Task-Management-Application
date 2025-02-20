@@ -33,7 +33,6 @@ const Dashboard = () => {
             title,
             description,
             category,
-            location,
         };
         
         fetch('http://localhost:3000/addTask', {
@@ -41,7 +40,6 @@ const Dashboard = () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            credentials: 'include',
             body: JSON.stringify(newTask),
         })
             .then((res) => res.json())
