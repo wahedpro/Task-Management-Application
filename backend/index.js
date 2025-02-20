@@ -39,11 +39,28 @@ async function run() {
             res.send(result);
         })
 
-        // delete campaign on the database
+        // delete task on the database
         app.delete('/tasks/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await TaskCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // update task on the database
+        app.put('/tasks/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const options = { upsert: true }; // Allows updating or inserting if missing
+            const updatedTask = req.body;
+            const task = {
+                $set: {
+                    title: updatedTask.title,
+                    description: updatedTask.description,
+                    category: updatedTask.category,
+                }
+            };
+            const result = await TaskCollection.updateOne(query, task, options);
             res.send(result);
         })
 
