@@ -15,10 +15,10 @@ const Dashboard = () => {
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("To-Do");
 
-    // Fetch Tasks (Sorted by Order)
+    // get the data who login
     useEffect(() => {
         if (mail) {
-            fetch(`http://localhost:3000/tasks`)
+            fetch(`http://localhost:3000/tasks?mail=${mail}`)
                 .then((res) => res.json())
                 .then((data) => {
                     const categorized = { "To-Do": [], "In Progress": [], "Done": [] };
@@ -28,6 +28,7 @@ const Dashboard = () => {
                 .catch((error) => console.error("Error fetching tasks:", error));
         }
     }, [mail]);
+
 
     // Open Modal (For Add & Edit)
     const openModal = (task = null) => {
@@ -122,7 +123,6 @@ const Dashboard = () => {
                     ...prevTasks,
                     [category]: [...prevTasks[category], { ...newTask, _id: data.insertedId }],
                 }));
-
                 closeModal();
             }
         }
@@ -132,7 +132,6 @@ const Dashboard = () => {
     const deleteTask = async (id, category) => {
         try {
             const response = await fetch(`http://localhost:3000/tasks/${id}`, { method: "DELETE" });
-
             if (response.ok) {
                 setTasks((prevTasks) => ({
                     ...prevTasks,
