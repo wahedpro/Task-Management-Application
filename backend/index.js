@@ -21,7 +21,9 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
+
         await client.connect();
+
         const TaskCollection = client.db('taskManagementDB').collection('Tasks');
 
         // Task Add API (Order Field)
@@ -33,9 +35,11 @@ async function run() {
             res.send(result);
         });
 
-        //  Get All Tasks (Order base Sort)
+        // Get Tasks of Logged-in User
         app.get('/tasks', async (req, res) => {
-            const result = await TaskCollection.find().sort({ order: 1 }).toArray();
+            const userMail = req.query.mail; 
+            const query = { mail: userMail };
+            const result = await TaskCollection.find(query).sort({ order: 1 }).toArray();
             res.send(result);
         });
 
