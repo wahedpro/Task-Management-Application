@@ -21,11 +21,11 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="w-[50%] mx-auto flex flex-col items-center">
+        <div className="w-[50%] mx-auto flex flex-col items-center py-52">
             <button
                 onClick={googleLogin}
                 disabled={loading}
-                className="text-white bg-[#6666F2] px-4 py-2 hover:bg-[#5757d8] transition disabled:opacity-50"
+                className="text-white py-2 px-7 bg-blue-500 hover:bg-blue-400 transition "
             >
                 {loading ? "Logging in..." : "Login with Google"}
             </button>

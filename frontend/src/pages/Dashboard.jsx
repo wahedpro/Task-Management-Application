@@ -144,7 +144,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="w-[85%] mx-auto py-5">
+        <div className="w-[85%] mx-auto py-24">
             <button onClick={() => openModal()} className="px-5 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">
                 + Add Task
             </button>
