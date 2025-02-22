@@ -3,6 +3,7 @@ import { AuthContext } from "../provider/AuthProvider";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+import { NavLink } from "react-router-dom";
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
@@ -18,7 +19,7 @@ const Dashboard = () => {
     // get the data who login
     useEffect(() => {
         if (mail) {
-            fetch(`http://localhost:3000/tasks?mail=${mail}`)
+            fetch(`https://backend-mu-ochre-36.vercel.app/tasks?mail=${mail}`)
                 .then((res) => res.json())
                 .then((data) => {
                     const categorized = { "To-Do": [], "In Progress": [], "Done": [] };
@@ -69,7 +70,7 @@ const Dashboard = () => {
         setTasks(updatedTasks);
 
         try {
-            await fetch(`http://localhost:3000/updateTaskOrder/${movedTask._id}`, {
+            await fetch(`https://backend-mu-ochre-36.vercel.app/updateTaskOrder/${movedTask._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ category: destCategory, order: destination.index }),
@@ -86,7 +87,7 @@ const Dashboard = () => {
 
         if (currentTask) {
             //  Update Task in MongoDB
-            const response = await fetch(`http://localhost:3000/tasks/${currentTask._id}`, {
+            const response = await fetch(`https://backend-mu-ochre-36.vercel.app/tasks/${currentTask._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newTask),
@@ -111,7 +112,7 @@ const Dashboard = () => {
             }
         } else {
             //  Add New Task to MongoDB
-            const response = await fetch("http://localhost:3000/tasks", {
+            const response = await fetch("https://backend-mu-ochre-36.vercel.app/tasks", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newTask),
@@ -131,7 +132,7 @@ const Dashboard = () => {
     //  Delete Task
     const deleteTask = async (id, category) => {
         try {
-            const response = await fetch(`http://localhost:3000/tasks/${id}`, { method: "DELETE" });
+            const response = await fetch(`https://backend-mu-ochre-36.vercel.app/tasks/${id}`, { method: "DELETE" });
             if (response.ok) {
                 setTasks((prevTasks) => ({
                     ...prevTasks,
@@ -143,9 +144,15 @@ const Dashboard = () => {
         }
     };
 
+    if(!mail) return <div className="py-48 text-center">
+        <p className="pb-5 text-xl">You must log in to Access.</p>
+        <NavLink to='/login' className="px-5 py-2 bg-blue-500 hover:bg-blue-400 text-white">Login</NavLink>
+    
+    </div>
+
     return (
-        <div className="w-[85%] mx-auto py-24">
-            <button onClick={() => openModal()} className="px-5 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">
+        <div className="w-[95%] mx-auto py-24">
+            <button onClick={() => openModal()} className="px-5 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-700">
                 + Add Task
             </button>
 
@@ -156,7 +163,7 @@ const Dashboard = () => {
 
                         <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-2 border rounded mb-3" required />
 
-                        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded mb-3" />
+                        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded mb-3" required/>
 
                         <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-2 border rounded mb-3">
                             <option value="To-Do">To-Do</option>
@@ -173,11 +180,11 @@ const Dashboard = () => {
             )}
 
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex gap-6 justify-center mt-5">
+                <div className="w-[95%] mx-auto lg:flex gap-5 justify-between mt-5 space-y-5">
                     {Object.keys(tasks).map((category) => (
                         <Droppable key={category} droppableId={category}>
                             {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="w-80 bg-gray-100 p-4 rounded-lg shadow-lg min-h-[300px]">
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="lg:w-[50%] bg-gray-100 p-4 rounded-lg shadow-lg min-h-[300px]">
                                     <h2 className="text-xl font-semibold mb-3">{category}</h2>
                                     {tasks[category].map((task, index) => (
                                         <Draggable key={task._id} draggableId={task._id} index={index}>

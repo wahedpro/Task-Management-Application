@@ -24,7 +24,19 @@ const AuthProvider = ({ children }) => {
         setLoading(true);
         try {
             const result = await signInWithPopup(auth, googleAuthProvider);
-            setUser(result.user); 
+            const user = result.user;
+            setUser(user);
+    
+            const userData = {
+                name: user.displayName,
+                email: user.email,
+            };
+    
+            await fetch("https://backend-mu-ochre-36.vercel.app/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData),
+            });
         } catch (error) {
             console.error("Google Login Error:", error);
         } finally {
@@ -33,12 +45,10 @@ const AuthProvider = ({ children }) => {
     };
 
     const manageProfile = (name, images) => {
-        if (!auth.currentUser) return Promise.reject("No user logged in");
         return updateProfile(auth.currentUser, {
-            displayName: name,
-            photoURL: images,
-        });
-    };
+            displayName: name, photoURL: images
+        })
+    }
 
     const logoutUser = async () => {
         setLoading(true);
