@@ -184,8 +184,8 @@ const Dashboard = () => {
                     {Object.keys(tasks).map((category) => (
                         <Droppable key={category} droppableId={category}>
                             {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="lg:w-[50%] bg-gray-100 p-4 rounded-lg shadow-lg min-h-[300px]">
-                                    <h2 className="text-xl font-semibold mb-3">{category}</h2>
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="lg:w-[50%] bg-gray-200 p-2 rounded-lg border-2 border-dotted border-blue-500 shadow-lg min-h-[300px]">
+                                    <h2 className="text-xl font-semibold mb-3 bg-blue-500 p-2 text-white">{category}</h2>
                                     {tasks[category].map((task, index) => (
                                         <Draggable key={task._id} draggableId={task._id} index={index}>
                                             {(provided) => (
