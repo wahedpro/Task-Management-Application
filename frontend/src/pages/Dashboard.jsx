@@ -15,6 +15,7 @@ const Dashboard = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("To-Do");
+    const [timeStamp, settimeStamp] = useState(new Date().toISOString());
 
     // get the data who login
     useEffect(() => {
@@ -38,6 +39,7 @@ const Dashboard = () => {
             setTitle(task.title);
             setDescription(task.description);
             setCategory(task.category);
+            settimeStamp(task.timeStamp)
         } else {
             setTitle("");
             setDescription("");
@@ -83,7 +85,7 @@ const Dashboard = () => {
     //  Handle Task Submission (Add & Edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const newTask = { mail, title, description, category };
+        const newTask = { mail, title, description, category, timeStamp };
 
         if (currentTask) {
             //  Update Task in MongoDB
@@ -144,11 +146,20 @@ const Dashboard = () => {
         }
     };
 
-    if(!mail) return <div className="py-48 text-center">
+    if (!mail) return <div className="py-48 text-center">
         <p className="pb-5 text-xl">You must log in to Access.</p>
         <NavLink to='/login' className="px-5 py-2 bg-blue-500 hover:bg-blue-400 text-white">Login</NavLink>
-    
     </div>
+
+    const getTimeColor = (timeStamp) => {
+        const taskTime = new Date(timeStamp);
+        const now = new Date();
+        const diffInHours = (now - taskTime) / (1000 * 60 * 60);
+
+        if (diffInHours < 1) return "text-green-500";  
+        if (diffInHours < 24) return "text-yellow-500";
+        return "text-red-500"; 
+    };
 
     return (
         <div className="w-[95%] mx-auto py-24">
@@ -163,7 +174,7 @@ const Dashboard = () => {
 
                         <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-2 border rounded mb-3" required />
 
-                        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded mb-3" required/>
+                        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded mb-3" required />
 
                         <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-2 border rounded mb-3">
                             <option value="To-Do">To-Do</option>
@@ -192,9 +203,15 @@ const Dashboard = () => {
                                                 <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="bg-white p-3 rounded-md shadow-sm flex flex-col gap-1 mb-2">
                                                     <p className="font-bold text-gray-800">{task.title}</p>
                                                     <p className="text-sm text-gray-600">{task.description}</p>
-                                                    <div className="flex justify-end gap-2 mt-2">
-                                                        <button onClick={() => openModal(task)} className="text-blue-500"><FaRegEdit /></button>
-                                                        <button onClick={() => deleteTask(task._id, category)} className="text-red-500"><MdDelete /></button>
+
+                                                    <div className="flex items-center justify-between mt-3">
+                                                        <p className={`text-sm ${getTimeColor(task.timeStamp)}`}>
+                                                            {new Date(task.timeStamp).toLocaleString()}
+                                                        </p>
+                                                        <div className="flex items-center gap-2">
+                                                            <button onClick={() => openModal(task)} className="text-blue-500 bg-gray-200 hover:bg-blue-400 hover:text-white p-2 rounded-full"><FaRegEdit /></button>
+                                                            <button onClick={() => deleteTask(task._id, category)} className="text-red-500 bg-gray-200 hover:bg-red-400 hover:text-white p-2 rounded-full"><MdDelete /></button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
