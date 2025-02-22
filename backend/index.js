@@ -22,9 +22,24 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
 
-        await client.connect();
+        // await client.connect();
 
         const TaskCollection = client.db('taskManagementDB').collection('Tasks');
+        const usersCollection = client.db('taskManagementDB').collection('users');
+
+
+        // Store User informatin if not exists on to the database
+        app.post('/users', async (req, res) => {
+            const userData = req.body;
+            // Check if user already exists using a unique field (e.g., email)
+            const existingUser = await usersCollection.findOne({ email: userData.email });
+            if (existingUser) {
+                return res.send({ message: "User already exists", user: existingUser });
+            }
+            // Insert new user
+            const result = await usersCollection.insertOne(userData);
+            res.send({ message: "User created successfully", insertedId: result.insertedId });
+        });
 
         // Task Add API (Order Field)
         app.post('/tasks', async (req, res) => {
@@ -79,7 +94,6 @@ async function run() {
             res.send(result);
         });
 
-        console.log("Connected to MongoDB!");
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
     }
